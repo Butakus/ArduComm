@@ -30,3 +30,21 @@
 *.exe
 *.out
 *.app
+
+# Python files
+__pycache__/
+*.py[cod]
+*$py.class
+
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
