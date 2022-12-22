@@ -21,27 +21,12 @@ def main(args):
     comm = ArdPiComm(test_callback, port=args.port, baudrate=args.baudrate)
     comm.start()
 
-    try:
-        while True:
-            command = input()
-            if command == 's':
-                print('Sending stop command')
-                comm.send(0x00)
-            elif command == 'f':
-                print('Sending forward command')
-                comm.send(0x03, [55, 50])
-            elif command == 'e':
-                print('Sending flag command')
-                comm.send(START_FLAG, [125])
-            elif command == 'a':
-                print('Sending ACK')
-                comm.send_frame(ACKFrame(1))
-            elif command == 'q':
-                break
-    except KeyboardInterrupt:
-        print("\nStopping...")
-    finally:
-        comm.stop()
+    t1 = time()
+    while time() - t1 < 5:
+        t2 = time()
+        comm.send(0x06, [1, 4, 70, 65])
+        print("Packet TX time: {}".format(time() - t2))
+    comm.stop()
 
 
 if __name__ == '__main__':
