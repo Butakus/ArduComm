@@ -1,8 +1,7 @@
-from arducomm import ArdPiComm, ACKFrame, START_FLAG
+from arducomm import ArdPiComm, ACKFrame
 from time import time
 
 BAUDRATE = 9600
-PORT = "/dev/pts/2"
 
 
 last_rx_time = 0

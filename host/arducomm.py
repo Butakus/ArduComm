@@ -56,6 +56,15 @@ def invert_bit_5(val):
     """ Invert the 5th bit """
     return val ^ (1 << 5)
 
+def escape_byte(val):
+    """ Return a bytearray with the escaped bytes (if escape is needed) """
+    escaped_data = []
+    if check_flag_conflict(val):
+        escaped_data.append(ESCAPE_FLAG)
+        escaped_data.append(invert_bit_5(val))
+    else:
+        escaped_data.append(val)
+    return bytearray(escaped_data)
 
 class PacketFrame(object):
     """ Class to implement the packet frame functionality """
@@ -67,7 +76,6 @@ class PacketFrame(object):
         self.payload_length = len(payload) & 0xFF
         self.payload = payload
 
-
     def serialize(self):
         """ Convert the object to a byte string to send it over the serial port and add the checksum """
         data = []
@@ -75,54 +83,24 @@ class PacketFrame(object):
         data.append(START_FLAG)
 
         # Sequence number
-        if check_flag_conflict(self.seq_number):
-            data.append(ESCAPE_FLAG)
-            data.append(invert_bit_5(self.seq_number))
-        else:
-            data.append(self.seq_number)
-
+        data += escape_byte(self.seq_number)
         # Command
-        if check_flag_conflict(self.command):
-            data.append(ESCAPE_FLAG)
-            data.append(invert_bit_5(self.command))
-        else:
-            data.append(self.command)
-
+        data += escape_byte(self.command)
         # Payload length
-        if check_flag_conflict(self.payload_length):
-            data.append(ESCAPE_FLAG)
-            data.append(invert_bit_5(self.payload_length))
-        else:
-            data.append(self.payload_length)
-
+        data += escape_byte(self.payload_length)
         # Payload
         for payload_b in self.payload:
-            if check_flag_conflict(payload_b):
-                data.append(ESCAPE_FLAG)
-                data.append(invert_bit_5(payload_b))
-            else:
-                data.append(payload_b)
+            data += escape_byte(payload_b)
 
         # Checksum
         checksum_msb, checksum_lsb = self.checksum()
-
-        if check_flag_conflict(checksum_msb):
-            data.append(ESCAPE_FLAG)
-            data.append(invert_bit_5(checksum_msb))
-        else:
-            data.append(checksum_msb)
-        if check_flag_conflict(checksum_lsb):
-            data.append(ESCAPE_FLAG)
-            data.append(invert_bit_5(checksum_lsb))
-        else:
-            data.append(checksum_lsb)
+        data += escape_byte(checksum_msb)
+        data += escape_byte(checksum_lsb)
 
         # End
         data.append(START_FLAG)
 
         return data
-
-
 
     def crc16(self):
         """ CRC-16 (CCITT) implemented with a precomputed lookup table.
@@ -173,12 +151,7 @@ class ACKFrame(PacketFrame):
         data.append(START_FLAG)
 
         # Sequence number
-        if check_flag_conflict(self.seq_number):
-            data.append(ESCAPE_FLAG)
-            data.append(invert_bit_5(self.seq_number))
-        else:
-            data.append(self.seq_number)
-
+        data += escape_byte(self.seq_number)
         # Command
         data.append(self.command)
 
@@ -238,14 +211,23 @@ class ArdPiComm(Thread):
                     continue
                 in_buffer += b
                 if b[0] == START_FLAG:
-                    # TODO: Verify that this is correct. Looks weird.
                     # Get number of bytes between start flags to skip ghost frames (between end_flag and start_flag)
-                    if (len(in_buffer) - 1) > 2:
-                        # Process frame
-                        frame_data = in_buffer[:]
-                        self.process_frame(frame_data)
-                        # Clear the current buffer
-                        in_buffer = bytearray()
+                    if len(in_buffer) > 3:
+                        if in_buffer[0] == START_FLAG:
+                            # Process frame
+                            frame_data = in_buffer[:]
+                            self.process_frame(frame_data)
+                            # Clear the current buffer
+                            in_buffer = bytearray()
+                        else:
+                            # We received a start flag but the buffer does not begin with a start flag
+                            print(F"Broken frame. Current buffer: {[i for i in in_buffer]}")
+                            in_buffer = b
+                    else:
+                        # We received a start flag but the buffer is too small to contain a full frame
+                        if len(in_buffer) > 1:
+                            print(F"Packet frame too small. Current buffer: {[i for i in in_buffer]}")
+                        in_buffer = b
             else:
                 sleep(PACKET_POLL_TIME)
 
@@ -292,7 +274,7 @@ class ArdPiComm(Thread):
                 if received_checksum[0] != computed_checksum[0] or received_checksum[1] != computed_checksum[1]:
                     retry = True
                     print("Packet checksum mismatch")
-            
+
             # Send ACK
             if retry:
                 # Reset the ack packet number to indicate retransmission
