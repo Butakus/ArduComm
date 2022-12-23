@@ -161,7 +161,7 @@ class ACKFrame(PacketFrame):
         return bytearray(data)
 
 
-class ArdPiComm(Thread):
+class ArduComm(Thread):
     """ Class to handle the serial object and implement the communication protocol """
     
     def __init__(self, message_callback, port='/dev/ttyACM0', baudrate=BAUDRATE):

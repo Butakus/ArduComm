@@ -1,4 +1,4 @@
-from arducomm import ArdPiComm, ACKFrame, START_FLAG
+from arducomm import ArduComm, ACKFrame, START_FLAG
 from time import time
 
 BAUDRATE = 9600
@@ -18,7 +18,7 @@ def test_callback(command, payload):
 def main(args):
     print(F"Serial port: {args.port}")
     print(F"Baudrate: {args.baudrate}")
-    comm = ArdPiComm(test_callback, port=args.port, baudrate=args.baudrate)
+    comm = ArduComm(test_callback, port=args.port, baudrate=args.baudrate)
     comm.start()
 
     try:

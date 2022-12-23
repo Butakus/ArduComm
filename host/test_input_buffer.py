@@ -1,6 +1,6 @@
 import serial
 from time import time, sleep
-from arducomm import ArdPiComm, PacketFrame
+from arducomm import ArduComm, PacketFrame
 
 BAUDRATE = 9600
 
@@ -29,7 +29,7 @@ def main(args):
     sleep(0.1)
 
     # Start ArduComm in port B to receive data
-    comm = ArdPiComm(test_callback, port=args.port_b, baudrate=args.baudrate)
+    comm = ArduComm(test_callback, port=args.port_b, baudrate=args.baudrate)
     comm.start()
     sleep(0.5)
 
