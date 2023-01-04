@@ -1,0 +1,107 @@
+#!/usr/bin/env python
+
+import os
+import shutil
+
+class Color:
+    """ ANSI Colors """
+    red = '\033[91m'
+    green = '\033[92m'
+    yellow = '\033[93m'
+    blue = '\033[94m'
+    purple = '\033[95m'
+    lightblue = '\033[96m'
+    bold = '\033[1m'
+    escape = '\033[0m'
+
+def color_text(s, color, bold=True):
+    """ Return the given string colored with ANSI codes """
+    b = Color.bold if bold else ''
+    return Color.escape + b + color + s + Color.escape
+
+def parse_preferences(file_path):
+    with open(file_path, 'r') as f:
+        for line in f:
+            if line.split('=')[0] == "sketchbook.path":
+                return line.split('=')[1].rstrip()
+    print(color_text('Could not find "sketchbook.path" in preferences.txt file', Color.red))
+    return ''
+
+def check_dir(dir_path):
+    """ Creates all missing directories in the given file path """
+    if not os.path.isdir(dir_path):
+        try:
+            print("Creating missing directory: {}".format(dir_path))
+            os.makedirs(dir_path)
+        except OSError as exc: # Guard against race condition
+            if exc.errno != errno.EEXIST:
+                print(color_text("Error creating directory:", Color.red))
+                print(color_text(exc.message, Color.red))
+                raise
+
+def main(args):
+    lib_dir = os.path.dirname(os.path.realpath(__file__))
+    print("Libraries dir: {}".format(lib_dir))
+
+    libraries = {}
+    for d in os.listdir(lib_dir):
+        full_lib_path = os.path.join(lib_dir, d)
+        if os.path.isdir(full_lib_path):
+            libraries[d] = full_lib_path
+
+    print("Libraries: ")
+    for l in libraries:
+        print('\t' + color_text(l, Color.lightblue))
+
+    arduino_lib_dirs = []
+
+    # Find ~/.arduino dir to read the preferences.txt file and find where is the sketchbook
+    arduino_config_dir = os.path.expanduser("~/.arduino")
+    if os.path.isdir(arduino_config_dir):
+        print("Found " + color_text("~/.arduino", Color.bold) + "config file")
+        preferences_file = os.path.join(arduino_config_dir, "preferences.txt") 
+        if os.path.isfile(preferences_file):
+            arduino_sketchbook_dir = parse_preferences(preferences_file)
+            arduino_lib_dir = os.path.join(arduino_sketchbook_dir, "libraries")
+            check_dir(arduino_lib_dir)
+            arduino_lib_dirs.append(arduino_lib_dir)
+        else:
+            print(color_text("~/.arduino/preferences.txt not found.", Color.yellow))
+    else:
+        print(color_text("~/.arduino/ config dir not found.", Color.yellow))
+
+    # Find ~/.arduino15 dir to read the preferences.txt file and find where is the sketchbook
+    arduino_config_dir = os.path.expanduser("~/.arduino15")
+    if os.path.isdir(arduino_config_dir):
+        print("Found " + color_text("~/.arduino15", Color.bold) + " config dir")
+        preferences_file = os.path.join(arduino_config_dir, "preferences.txt") 
+        if os.path.isfile(preferences_file):
+            arduino_sketchbook_dir = parse_preferences(preferences_file)
+            arduino_lib_dir = os.path.join(arduino_sketchbook_dir, "libraries")
+            check_dir(arduino_lib_dir)
+            arduino_lib_dirs.append(arduino_lib_dir)
+        else:
+            print(color_text("~/.arduino/preferences.txt not found.", Color.yellow))
+    else:
+        print(color_text("~/.arduino/ config dir not found.", Color.yellow))
+
+    if len(arduino_lib_dirs) > 1 and arduino_lib_dirs[0] != arduino_lib_dirs[1]:
+        print(color_text("Found 2 arduino versions installed pointing to different sketchbooks:", Color.yellow))
+        print('\t' + arduino_lib_dirs[0])
+        print('\t' + arduino_lib_dirs[1])
+        print(color_text("Libraries will be copied to both directories", Color.yellow))
+    else:
+        print("Arduino libraries dir: {}".format(color_text(arduino_lib_dirs[0], Color.bold)))
+
+    for install_lib_dir in arduino_lib_dirs:
+        # Remove the previous version of the libraries
+        for lib in libraries:
+            shutil.rmtree(os.path.join(install_lib_dir, lib), ignore_errors=True)
+        # Copy the current version of the libraries
+        for lib in libraries:
+            print("Installing library " + color_text(lib, Color.lightblue) + " in " + color_text(install_lib_dir, Color.bold))
+            shutil.copytree(libraries[lib], os.path.join(install_lib_dir, lib))
+
+if __name__ == '__main__':
+    # TODO: Add argparse to point the installation dir for libraries.
+    main(None)

@@ -1,0 +1,6 @@
+ArduComm	KEYWORD 1
+
+begin	KEYWORD 2
+comm_data	KEYWORD 2
+get_command	KEYWORD 2
+get_arg	KEYWORD 2

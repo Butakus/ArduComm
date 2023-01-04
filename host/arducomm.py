@@ -210,19 +210,19 @@ class ArduComm(Thread):
                     print("Error: Could not read the serial port!")
                     continue
                 in_buffer += b
-                if b[0] == START_FLAG:
+                if in_buffer[0] != START_FLAG:
+                    # Broken frame. The buffer will never contain a full packet.
+                    print(F"Broken frame. Current buffer: {[i for i in in_buffer]}")
+                    # Drop bytes until a START_FLAG arrives
+                    in_buffer.clear()
+                elif b[0] == START_FLAG:
                     # Get number of bytes between start flags to skip ghost frames (between end_flag and start_flag)
                     if len(in_buffer) > 3:
-                        if in_buffer[0] == START_FLAG:
-                            # Process frame
-                            frame_data = in_buffer[:]
-                            self.process_frame(frame_data)
-                            # Clear the current buffer
-                            in_buffer = bytearray()
-                        else:
-                            # We received a start flag but the buffer does not begin with a start flag
-                            print(F"Broken frame. Current buffer: {[i for i in in_buffer]}")
-                            in_buffer = b
+                        # Process frame
+                        frame_data = in_buffer[:]
+                        self.process_frame(frame_data)
+                        # Clear the current buffer
+                        in_buffer.clear()
                     else:
                         # We received a start flag but the buffer is too small to contain a full frame
                         if len(in_buffer) > 1:
