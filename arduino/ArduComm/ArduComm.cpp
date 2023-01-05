@@ -32,8 +32,10 @@ void ArduComm::begin(Stream *port)
     serial_ = port;
 }
 
-/* Read all bytes in the serial buffer and check if a new frame is available.
-*  Return 1 if a new packet is available, else 0
+/* Read the bytes from the serial buffer and check if a new frame is available.
+*  Return 1 if a new packet is available, else 0.
+*  Note: The reading will stop when a full frame is found.
+*        The serial buffer might not be completely read.
 */
 uint8_t ArduComm::read()
 {
@@ -187,6 +189,14 @@ uint8_t ArduComm::process_frame()
         }
         escaped_data[total_size++] = b;
     }
+    /* Even if we received 4 bytes, one of them could have been the escape.
+    *  In this case the frame is not valid (only 3 bytes: S/?/S).
+    */
+    // TODO: Decide what to do in this case. For now, silently drop the message.
+    if (total_size < 4)
+    {
+        return 0;
+    }
 
     if (escaped_data[COMMAND] == ACK_COMMAND)
     {
@@ -205,7 +215,7 @@ uint8_t ArduComm::process_frame()
         // Received a packet frame. Update the command and payload fields
         // Copy frame data
         command_ = escaped_data[COMMAND];
-        // Maybe the frame size is smaller than 6 (frame without checksum like ACKs)
+        // Maybe the frame size is smaller than 6 (frames without checksum like ACKs, should never happen)
         payload_size_ = total_size > 6 ? total_size - 6 : 0;
         for (int i = 0; i < payload_size_; ++i)
         {

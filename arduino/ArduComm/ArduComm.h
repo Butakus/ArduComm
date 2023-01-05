@@ -53,8 +53,10 @@ public:
     /* Initialize the serial object. serial.begin() must be called before this */
     void begin(Stream* serial);
 
-    /* Read all bytes in the serial buffer and check if a new frame is available.
-    *  Return 1 if a new packet is available, else 0
+    /* Read the bytes from the serial buffer and check if a new frame is available.
+    *  Return 1 if a new packet is available, else 0.
+    *  Note: The reading will stop when a full frame is found.
+    *        The serial buffer might not be completely read.
     */
     uint8_t read();
 
