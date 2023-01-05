@@ -1,8 +1,7 @@
 from arducomm import ArduComm, ACKFrame, START_FLAG
 from time import time
 
-BAUDRATE = 9600
-PORT = "/dev/pts/2"
+BAUDRATE = 57600
 
 
 last_rx_time = 0

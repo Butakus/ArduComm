@@ -1,3 +1,4 @@
+""" Test how the library handles broken frames """
 import serial
 from time import time, sleep
 from arducomm import ArduComm, PacketFrame

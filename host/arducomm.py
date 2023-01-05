@@ -73,7 +73,7 @@ class PacketFrame(object):
         self.command = command & 0xFF
         if len(payload) > 255:
             raise ValueError(F"Payload cannot have more than 255 bytes. Current payload length is {len(payload)}")
-        self.payload = payload
+        self.payload = bytearray(payload)
 
     def serialize(self):
         """ Convert the object to a byte string to send it over the serial port and add the checksum """
@@ -117,7 +117,7 @@ class PacketFrame(object):
         """ Compute the 16bit Fletcher's checksum of the data """
         lsb = 0
         msb = 0
-        data = [self.seq_number, self.command] + self.payload
+        data = bytearray([self.seq_number, self.command]) + self.payload
         for i in range(len(data)):
             lsb += data[i]
             msb += lsb
@@ -253,7 +253,7 @@ class ArduComm(Thread):
             # Create ACKFrame and store it
             self.last_ack = ACKFrame(seq_number)
         else:
-            payload = escaped_data[3:-3]
+            payload = bytes(escaped_data[3:-3])
             packet = PacketFrame(seq_number, command, payload)
 
             # Check checksum

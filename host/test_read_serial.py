@@ -1,4 +1,4 @@
-""" Read the serial port to test the library """
+""" Read the serial port to test the library (raw reading) """
 import serial
 from time import time, sleep
 
