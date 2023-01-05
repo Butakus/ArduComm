@@ -41,7 +41,7 @@ enum frame_index
     FLAG = 0,
     SEQ_NUMBER = 1,
     COMMAND = 2,
-    PAYLOAD_SIZE = 3
+    PAYLOAD = 3
 };
 
 class ArduComm{

@@ -109,9 +109,6 @@ TXError ArduComm::send(uint8_t command, uint8_t payload_size, uint8_t payload[])
     // Command
     write_escaped(command);
     
-    // Payload size
-    write_escaped(payload_size);
-
     // Payload
     for (uint8_t i = 0; i < payload_size; ++i)
     {
@@ -206,32 +203,23 @@ uint8_t ArduComm::process_frame()
     else
     {
         // Received a packet frame. Update the command and payload fields
-        uint8_t retry = 0;
-
         // Copy frame data
         command_ = escaped_data[COMMAND];
-        payload_size_ = escaped_data[PAYLOAD_SIZE];
+        // Maybe the frame size is smaller than 6 (frame without checksum like ACKs)
+        payload_size_ = total_size > 6 ? total_size - 6 : 0;
         for (int i = 0; i < payload_size_; ++i)
         {
-            payload_[i] = escaped_data[i+4];
+            payload_[i] = escaped_data[PAYLOAD + i];
         }
 
-        // Check size and checksum
-        if (payload_size_ != total_size - 7)
-        {
-            retry = 1;
-        }
-        else
-        {
-            uint16_t received_checksum = (escaped_data[total_size - 3] << 8) | escaped_data[total_size - 2];
-            uint16_t computed_checksum = checksum(escaped_data[SEQ_NUMBER], command_, payload_size_, payload_);
-
-            if (received_checksum != computed_checksum) retry = 1;
-        }
+        // Check checksum
+        uint16_t received_checksum = (escaped_data[total_size - 3] << 8) | escaped_data[total_size - 2];
+        uint16_t computed_checksum = checksum(escaped_data[SEQ_NUMBER], command_, payload_size_, payload_);
 
         // Send ACK
-        if (retry)
+        if (received_checksum != computed_checksum)
         {
+            // Retry
             send_ack(escaped_data[SEQ_NUMBER]);
         }
         else
@@ -290,8 +278,6 @@ uint16_t ArduComm::checksum(uint8_t seq_number, uint8_t command, uint8_t payload
     lsb += seq_number;
     msb += lsb;
     lsb += command;
-    msb += lsb;
-    lsb += payload_size;
     msb += lsb;
 
     for (int i = 0; i < payload_size; ++i)

@@ -73,7 +73,6 @@ class PacketFrame(object):
         self.command = command & 0xFF
         if len(payload) > 255:
             raise ValueError(F"Payload cannot have more than 255 bytes. Current payload length is {len(payload)}")
-        self.payload_length = len(payload) & 0xFF
         self.payload = payload
 
     def serialize(self):
@@ -86,8 +85,6 @@ class PacketFrame(object):
         data += escape_byte(self.seq_number)
         # Command
         data += escape_byte(self.command)
-        # Payload length
-        data += escape_byte(self.payload_length)
         # Payload
         for payload_b in self.payload:
             data += escape_byte(payload_b)
@@ -111,8 +108,6 @@ class PacketFrame(object):
         crc &= 0xFFFF # important, crc must stay 16bits all the way through
         crc = (crc << 8) ^ CRC16_LUT[(crc >> 8) ^ self.command]
         crc &= 0xFFFF
-        crc = (crc << 8) ^ CRC16_LUT[(crc >> 8) ^ self.payload_length]
-        crc &= 0xFFFF
         for payload_byte in self.payload:
             crc = (crc << 8) ^ CRC16_LUT[(crc >> 8) ^ payload_byte]
             crc &= 0xFFFF
@@ -122,7 +117,7 @@ class PacketFrame(object):
         """ Compute the 16bit Fletcher's checksum of the data """
         lsb = 0
         msb = 0
-        data = [self.seq_number, self.command, self.payload_length] + self.payload
+        data = [self.seq_number, self.command] + self.payload
         for i in range(len(data)):
             lsb += data[i]
             msb += lsb
@@ -258,25 +253,17 @@ class ArduComm(Thread):
             # Create ACKFrame and store it
             self.last_ack = ACKFrame(seq_number)
         else:
-            retry = False
-            payload_length = escaped_data[3]
-            payload = escaped_data[4:-3]
-            # Verify length
-            if len(payload) != payload_length:
-                retry = True
-                print("Packet payload size mismatch")
-            else:
-                packet = PacketFrame(seq_number, command, payload)
+            payload = escaped_data[3:-3]
+            packet = PacketFrame(seq_number, command, payload)
 
-                # Check checksum
-                received_checksum = (escaped_data[-3], escaped_data[-2])
-                computed_checksum = packet.checksum()
-                if received_checksum[0] != computed_checksum[0] or received_checksum[1] != computed_checksum[1]:
-                    retry = True
-                    print("Packet checksum mismatch")
+            # Check checksum
+            received_checksum = (escaped_data[-3], escaped_data[-2])
+            computed_checksum = packet.checksum()
+            retry = received_checksum[0] != computed_checksum[0] or received_checksum[1] != computed_checksum[1]
 
             # Send ACK
             if retry:
+                print("Packet checksum mismatch")
                 # Reset the ack packet number to indicate retransmission
                 self.send_frame(ACKFrame(seq_number))
             else:
