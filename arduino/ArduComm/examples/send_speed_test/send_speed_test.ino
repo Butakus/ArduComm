@@ -16,7 +16,7 @@ ArduComm comms;
 uint8_t arr[4] = {5, 48, 100, 150};
 
 void setup(){
-    Serial.begin(BAUDRATE);
+    Serial.begin(57600);
     comms.begin(&Serial);
 
     pinMode(13, OUTPUT);

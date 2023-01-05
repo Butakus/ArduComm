@@ -16,7 +16,7 @@ ArduComm comms;
 
 void setup()
 {
-    Serial.begin(BAUDRATE);
+    Serial.begin(57600);
     comms.begin(&Serial);
 }
 

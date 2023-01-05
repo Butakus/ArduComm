@@ -18,7 +18,7 @@ uint8_t arr[4] = {5, 48, 100, 150};
 
 void setup()
 {
-    Serial.begin(BAUDRATE);
+    Serial.begin(57600);
     comms.begin(&Serial);
 
     pinMode(13, OUTPUT);
@@ -40,7 +40,6 @@ void loop()
     {
         uint8_t command = comms.get_command();
         uint8_t payload_size = comms.get_payload(payload);
-
     }
     //delay(10);
     // Write

@@ -227,7 +227,7 @@ class ArduComm(Thread):
                         # We received a start flag but the buffer is too small to contain a full frame
                         if len(in_buffer) > 1:
                             print(F"Packet frame too small. Current buffer: {[i for i in in_buffer]}")
-                        in_buffer = b
+                        in_buffer = bytearray(b)
             else:
                 sleep(PACKET_POLL_TIME)
 
