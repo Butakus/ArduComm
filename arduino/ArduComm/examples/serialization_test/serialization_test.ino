@@ -1,5 +1,5 @@
 #include <ArduComm.h>
-#include <serialization/ArduParser.h>
+#include <serialization/base_serialization.h>
 
 
 ArduComm comms;
@@ -16,49 +16,49 @@ void setup()
     blink(1000);
 
     char c = 'A';
-    serialize_char(c, data);
+    serialize(c, data);
     error = comms.send(10, 1, data);
     handle_error(error);
     delay(1000);
 
-    char s[5] = "test";
-    serialize_string(s, data);
+    String s = "test";
+    serialize(s, data);
     error = comms.send(2, 5, data);
     handle_error(error);
     delay(1000);
 
     int8_t i8 = -100;
-    serialize_int8(i8, data);
+    serialize(i8, data);
     error = comms.send(3, 1, data);
     handle_error(error);
     delay(1000);
 
     int16_t i16 = -1000;
-    serialize_int16(i16, data);
+    serialize(i16, data);
     error = comms.send(4, 2, data);
     handle_error(error);
     delay(1000);
 
     uint16_t ui16 = 1000;
-    serialize_uint16(ui16, data);
+    serialize(ui16, data);
     error = comms.send(5, 2, data);
     handle_error(error);
     delay(1000);
 
     int32_t i32 = -100000;
-    serialize_int32(i32, data);
+    serialize(i32, data);
     error = comms.send(6, 4, data);
     handle_error(error);
     delay(1000);
 
     uint32_t ui32 = 100000;
-    serialize_uint32(ui32, data);
+    serialize(ui32, data);
     error = comms.send(7, 4, data);
     handle_error(error);
     delay(1000);
 
     float f = 3.14159265;
-    serialize_float(f, data);
+    serialize(f, data);
     error = comms.send(8, 4, data);
     handle_error(error);
     delay(1000);

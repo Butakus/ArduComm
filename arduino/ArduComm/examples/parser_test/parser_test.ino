@@ -1,5 +1,5 @@
 #include <ArduComm.h>
-#include <serialization/ArduParser.h>
+#include <serialization/base_serialization.h>
 
 
 ArduComm comms;
@@ -33,7 +33,7 @@ void loop()
             case 10:
             {
                 // Char test
-                char c = parse_char(&data[0]);
+                char c = parse<char>(data);
                 success = (uint8_t)(c == 'A');
                 error = comms.send(command, 1, &success);
                 break;
@@ -41,16 +41,15 @@ void loop()
             case 2:
             {
                 // String test
-                char s[10];
-                uint8_t length = parse_string(&data[0], s);
-                success = (strcmp(s, "test") == 0) && (length == 5);
+                String s = parse<String>(data);
+                success = s == "test";
                 error = comms.send(command, 1, &success);
                 break;
             }
             case 3:
             {
                 // int8 test
-                int8_t i8 = parse_int8(&data[0]);
+                int8_t i8 = parse<int8_t>(data);
                 success = (uint8_t)(i8 == -100);
                 error = comms.send(command, 1, &success);
                 break;
@@ -58,7 +57,7 @@ void loop()
             case 4:
             {
                 // int16 test
-                int16_t i16 = parse_int16(&data[0]);
+                int16_t i16 = parse<int16_t>(data);
                 success = (uint8_t)(i16 == -1000);
                 error = comms.send(command, 1, &success);
                 break;
@@ -66,7 +65,7 @@ void loop()
             case 5:
             {
                 // uint16 test
-                int16_t ui16 = parse_uint16(&data[0]);
+                int16_t ui16 = parse<uint16_t>(data);
                 success = (uint8_t)(ui16 == 1000);
                 error = comms.send(command, 1, &success);
                 break;
@@ -74,7 +73,7 @@ void loop()
             case 6:
             {
                 // int32 test
-                int32_t i32 = parse_int32(&data[0]);
+                int32_t i32 = parse<int32_t>(data);
                 success = (uint8_t)(i32 == -100000);
                 error = comms.send(command, 1, &success);
                 break;
@@ -82,7 +81,7 @@ void loop()
             case 7:
             {
                 // uint32 test
-                uint32_t ui32 = parse_uint32(&data[0]);
+                uint32_t ui32 = parse<uint32_t>(data);
                 success = (uint8_t)(ui32 == 100000);
                 error = comms.send(command, 1, &success);
                 break;
@@ -90,7 +89,7 @@ void loop()
             case 8:
             {
                 // float test
-                float f = parse_float(&data[0]);
+                float f = parse<float>(data);
                 success = (uint8_t)(f == 3.14159265);
                 error = comms.send(command, 1, &success);
                 break;
