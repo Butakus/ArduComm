@@ -10,8 +10,8 @@
 *  Date:    February 2017
 */
 
-#ifndef ArduComm_h
-#define ArduComm_h
+#ifndef ARDUCOMM_H
+#define ARDUCOMM_H
 
 #include <Arduino.h>
 

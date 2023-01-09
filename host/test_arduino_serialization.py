@@ -7,6 +7,7 @@
 import arduparser
 from arducomm import ArduComm
 from time import sleep
+import struct
 
 BAUDRATE = 57600
 
@@ -57,6 +58,10 @@ def test_callback(command, payload):
         print(F"Received float: '{data}'...")
         print(F"Match 3.14159265: {(data == 3.14159265)}")
         print(F"Float error: {(abs(data - 3.14159265))}")
+
+    elif command == 9:
+        # data = arduparser.parse_float(payload)
+        print(F"Received Vector3: '{struct.unpack('<3f', bytes(payload))}'...")
 
 
 def main(args):

@@ -1,9 +1,9 @@
 #include <ArduComm.h>
-#include <serialization/base_serialization.h>
+#include <arducomm/serialization.h>
 
 
 ArduComm comms;
-uint8_t data[64];
+uint8_t payload[64];
 
 
 void setup()
@@ -26,14 +26,14 @@ void loop()
     if (comms.read())
     {
         uint8_t command = comms.get_command();
-        uint8_t payload_size = comms.get_payload(data);
+        uint8_t payload_size = comms.get_payload(payload);
 
         switch (command)
         {
             case 10:
             {
                 // Char test
-                char c = parse<char>(data);
+                char c = parse<char>(payload);
                 success = (uint8_t)(c == 'A');
                 error = comms.send(command, 1, &success);
                 break;
@@ -41,7 +41,7 @@ void loop()
             case 2:
             {
                 // String test
-                String s = parse<String>(data);
+                String s = parse<String>(payload);
                 success = s == "test";
                 error = comms.send(command, 1, &success);
                 break;
@@ -49,7 +49,7 @@ void loop()
             case 3:
             {
                 // int8 test
-                int8_t i8 = parse<int8_t>(data);
+                int8_t i8 = parse<int8_t>(payload);
                 success = (uint8_t)(i8 == -100);
                 error = comms.send(command, 1, &success);
                 break;
@@ -57,7 +57,7 @@ void loop()
             case 4:
             {
                 // int16 test
-                int16_t i16 = parse<int16_t>(data);
+                int16_t i16 = parse<int16_t>(payload);
                 success = (uint8_t)(i16 == -1000);
                 error = comms.send(command, 1, &success);
                 break;
@@ -65,7 +65,7 @@ void loop()
             case 5:
             {
                 // uint16 test
-                int16_t ui16 = parse<uint16_t>(data);
+                int16_t ui16 = parse<uint16_t>(payload);
                 success = (uint8_t)(ui16 == 1000);
                 error = comms.send(command, 1, &success);
                 break;
@@ -73,7 +73,7 @@ void loop()
             case 6:
             {
                 // int32 test
-                int32_t i32 = parse<int32_t>(data);
+                int32_t i32 = parse<int32_t>(payload);
                 success = (uint8_t)(i32 == -100000);
                 error = comms.send(command, 1, &success);
                 break;
@@ -81,7 +81,7 @@ void loop()
             case 7:
             {
                 // uint32 test
-                uint32_t ui32 = parse<uint32_t>(data);
+                uint32_t ui32 = parse<uint32_t>(payload);
                 success = (uint8_t)(ui32 == 100000);
                 error = comms.send(command, 1, &success);
                 break;
@@ -89,7 +89,7 @@ void loop()
             case 8:
             {
                 // float test
-                float f = parse<float>(data);
+                float f = parse<float>(payload);
                 success = (uint8_t)(f == 3.14159265);
                 error = comms.send(command, 1, &success);
                 break;

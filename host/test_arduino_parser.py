@@ -65,6 +65,11 @@ def main(args):
     comm.send(8, arduparser.serialize_float(data))
     sleep(1)
 
+    data = [5.0, 1.0, 0.0]
+    print(F"Sending cmd 9, Vector3: {data}...")
+    comm.send(9, struct.pack('<3f', data))
+    sleep(1)
+
     print("Waiting 5 seconds until all responses are received...")
     sleep(5)
 
