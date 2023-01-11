@@ -4,8 +4,9 @@
 
     Arduino serializes -> Host parses.
 """
-import arduparser
+
 from arducomm import ArduComm
+import serialization
 from time import sleep
 import struct
 
@@ -19,49 +20,49 @@ def test_callback(command, payload):
     print("###")
 
     if command == 10:
-        data = arduparser.parse_char(payload)
+        data = serialization.parse(payload, dtype='char')
         print(F"Received char: '{data}'...")
         print(F"Match 'A': {(data == 'A')}")
 
     elif command == 2:
-        data = arduparser.parse_str(payload)
+        data = serialization.parse(payload, dtype='str')
         print(F"Received string: '{data}'...")
         print(F"Match 'test': {(data == 'test')}")
 
     elif command == 3:
-        data = arduparser.parse_int8(payload)
+        data = serialization.parse(payload, dtype='int8')
         print(F"Received int8: '{data}'...")
         print(F"Match -100: {(data == -100)}")
 
     elif command == 4:
-        data = arduparser.parse_int16(payload)
+        data = serialization.parse(payload, dtype='int16')
         print(F"Received int16: '{data}'...")
         print(F"Match -1000: {(data == -1000)}")
 
     elif command == 5:
-        data = arduparser.parse_uint16(payload)
+        data = serialization.parse(payload, dtype='uint16')
         print(F"Received uint16: '{data}'...")
         print(F"Match 1000: {(data == 1000)}")
 
     elif command == 6:
-        data = arduparser.parse_int32(payload)
+        data = serialization.parse(payload, dtype='int32')
         print(F"Received int32: '{data}'...")
         print(F"Match -100000: {(data == -100000)}")
 
     elif command == 7:
-        data = arduparser.parse_uint32(payload)
+        data = serialization.parse(payload, dtype='uint32')
         print(F"Received uint32: '{data}'...")
         print(F"Match 100000: {(data == 100000)}")
 
     elif command == 8:
-        data = arduparser.parse_float(payload)
+        data = serialization.parse(payload, dtype='float')
         print(F"Received float: '{data}'...")
         print(F"Match 3.14159265: {(data == 3.14159265)}")
         print(F"Float error: {(abs(data - 3.14159265))}")
 
-    elif command == 9:
-        # data = arduparser.parse_float(payload)
-        print(F"Received Vector3: '{struct.unpack('<3f', bytes(payload))}'...")
+    # elif command == 9:
+    #     # data = serialization.parse(payload, dtype='float')
+    #     print(F"Received Vector3: '{struct.unpack('<3f', bytes(payload))}'...")
 
 
 def main(args):
