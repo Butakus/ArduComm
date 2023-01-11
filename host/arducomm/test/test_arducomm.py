@@ -1,4 +1,5 @@
-from arducomm import ArduComm, ACKFrame, START_FLAG
+from arducomm import ArduComm
+from arducomm.arducomm import ACKFrame, START_FLAG
 from time import time
 
 BAUDRATE = 57600

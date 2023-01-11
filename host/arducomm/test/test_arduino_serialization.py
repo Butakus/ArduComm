@@ -5,8 +5,7 @@
     Arduino serializes -> Host parses.
 """
 
-from arducomm import ArduComm
-import serialization
+from arducomm import ArduComm, serialization
 from time import sleep
 import struct
 

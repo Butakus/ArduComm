@@ -1,0 +1,52 @@
+[project]
+
+name = "arducomm"
+
+version = "0.1.0"
+
+description = "A library to enable robust communication between an Arduino and a host via serial"
+
+readme = "README.md"
+
+requires-python = ">=3.7"
+
+license = {"text" = "GLPv3"}
+
+keywords = ["communication", "arduino", "serial"]
+
+authors = [
+  {name = "Francisco Miguel Moreno", email = "butakus@gmail.com" }
+]
+maintainers = [
+  {name = "Francisco Miguel Moreno", email = "butakus@gmail.com" }
+]
+
+classifiers = [
+  "Development Status :: 3 - Alpha",
+
+  "Intended Audience :: Developers",
+  "Topic :: Terminals :: Serial",
+  "Topic :: Communications",
+  "Topic :: Software Development :: Libraries",
+
+  "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3 :: Only",
+]
+
+dependencies = [
+  "pyserial"
+]
+
+[project.urls]
+"Source" = "https://github.com/butakus/arducomm-ros"
+
+[build-system]
+requires = ["setuptools>=43.0.0", "wheel"]
+build-backend = "setuptools.build_meta"

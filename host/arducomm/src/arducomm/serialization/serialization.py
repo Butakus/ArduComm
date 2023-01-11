@@ -22,14 +22,13 @@ class Serializable(ABC):
     @abstractmethod
     def parse(self, buffer):
         """ Parse (deserialize) the bytes from a buffer.
-            Return a bytes-like object with the serialized data.
+            Update the instance object and return self.
         """
         pass
 
 
-""" Serialization of numbers.
-"""
-_num_fmt = {
+""" Serialization of numbers """
+_NUM_FMT = {
     'uint8': '<B',
     'int8': '<b',
     'uint16': '<H',
@@ -41,11 +40,11 @@ _num_fmt = {
 
 def serialize_num(data, dtype):
     """ Convert a number into a bytes object """
-    return struct.pack(_num_fmt[dtype], data)
+    return struct.pack(_NUM_FMT[dtype], data)
 
 def parse_num(buffer, dtype):
     """ Convert byte list into a number """
-    return struct.unpack(_num_fmt[dtype], bytes(buffer))[0]
+    return struct.unpack(_NUM_FMT[dtype], bytes(buffer))[0]
 
 
 """ Serialization of chars and strings (null terminated) """
@@ -69,7 +68,7 @@ def parse_str(buffer):
 
 def serialize(data, dtype=Serializable):
     if dtype is not Serializable:
-        if dtype in _num_fmt:
+        if dtype in _NUM_FMT:
             return serialize_num(data, dtype)
         elif dtype == 'char':
             return serialize_char(data)
@@ -83,7 +82,7 @@ def serialize(data, dtype=Serializable):
 
 def parse(buffer, dtype=Serializable):
     if dtype is not Serializable:
-        if dtype in _num_fmt:
+        if dtype in _NUM_FMT:
             return parse_num(buffer, dtype)
         elif dtype == 'str' or dtype == 'char':
             return parse_str(buffer)
