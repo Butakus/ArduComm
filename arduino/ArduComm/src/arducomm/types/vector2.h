@@ -18,7 +18,7 @@ public:
     float x;
     float y;
     // Payload size
-    const static uint8_t size = 8;
+    const static uint8_t size = 2*sizeof(float);
 
     Vector2()
     {

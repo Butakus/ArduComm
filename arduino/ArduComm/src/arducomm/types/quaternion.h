@@ -20,7 +20,7 @@ public:
     float z;
     float w;
     // Payload size
-    const static uint8_t size = 16;
+    const static uint8_t size = 4*sizeof(float);
 
     Quaternion()
     {

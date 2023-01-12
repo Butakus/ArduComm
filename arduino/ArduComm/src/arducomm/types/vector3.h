@@ -19,7 +19,7 @@ public:
     float y;
     float z;
     // Payload size
-    const static uint8_t size = 12;
+    const static uint8_t size = 3*sizeof(float);
 
     Vector3()
     {

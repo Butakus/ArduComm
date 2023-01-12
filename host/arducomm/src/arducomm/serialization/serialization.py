@@ -1,6 +1,7 @@
 """ Module to serialize and parse the bytes read with ArduComm into common types """
 
 import struct
+import inspect
 from abc import ABC, abstractmethod
 
 class Serializable(ABC):
@@ -8,10 +9,6 @@ class Serializable(ABC):
         All classes meant to be serialized and sent whtough ArduComm must
         inherit from this base class and implement its abstract methods.
     """
-    def __init__(self):
-        """ TODO: Docstring """
-        raise NotImplemented()
-
     @abstractmethod
     def serialize(self):
         """ Serialize the data contained in self.
@@ -76,18 +73,19 @@ def serialize(data, dtype=Serializable):
             return serialize_str(data)
         else:
             raise ValueError(F"Unknown dtype: '{dtype}'")
-    else:
-        # Assume data is a Serializable object and provides 'serialize' method
+    elif isinstance(data, Serializable):
+        # Data is a Serializable object and provides 'serialize' method
         return data.serialize()
+    else:
+        raise ValueError(F"data is not a Serializable class")
 
 def parse(buffer, dtype=Serializable):
-    if dtype is not Serializable:
-        if dtype in _NUM_FMT:
-            return parse_num(buffer, dtype)
-        elif dtype == 'str' or dtype == 'char':
-            return parse_str(buffer)
-        else:
-            raise ValueError(F"Unknown dtype: '{dtype}'")
+    if inspect.isclass(dtype) and issubclass(dtype, Serializable):
+        # dtype is a Serializable class and provides 'parse' method
+        return dtype().parse(buffer)
+    elif dtype in _NUM_FMT:
+        return parse_num(buffer, dtype)
+    elif dtype == 'str' or dtype == 'char':
+        return parse_str(buffer)
     else:
-        # Assume data is a Serializable object and provides 'parse' method
-        return data.parse(buffer)
+        raise ValueError(F"Unknown dtype: '{dtype}'")

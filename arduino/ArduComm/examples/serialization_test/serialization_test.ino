@@ -83,10 +83,9 @@ void setup()
     {
         const uint8_t fa_size = 5;
         FloatArray<fa_size> fa;
-        fa[0] = 1.1;
-        fa[4] == 5.5;
+        for (uint8_t i = 0; i < fa_size; i++) fa[i] = 1.1 + 1.1*i;
         serialize(fa, payload);
-        error = comms.send(10, fa_size, payload);
+        error = comms.send(10, fa.size, payload);
         handle_error(error);
         delay(1000);
     }
@@ -116,7 +115,7 @@ void setup()
     }
     // Pose2D serialization test
     {
-        Pose2D p2(4.4, 0.0, 0.6);
+        Pose2D p2(4.4, 2.3, 0.6);
         serialize(p2, payload);
         error = comms.send(14, Pose2D::size, payload);
         handle_error(error);

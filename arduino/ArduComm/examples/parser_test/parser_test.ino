@@ -122,7 +122,7 @@ void loop()
             {
                 // Quaternion test
                 Quaternion q = parse<Quaternion>(payload);
-                success = (uint8_t)(q.x = 0.0 && q.y == 0.0 && q.z == 0.707 && q.w == 0.707);
+                success = (uint8_t)(q.x == 0.0 && q.y == 0.0 && q.z == 0.707 && q.w == 0.707);
                 error = comms.send(command, 1, &success);
                 break;
             }
