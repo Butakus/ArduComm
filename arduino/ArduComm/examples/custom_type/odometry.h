@@ -10,9 +10,9 @@
 *  Date:    January 2023
 */
 
-#include <ArduComm.h>
 #include <arducomm/serialization.h>
 #include <arducomm/types/pose.h>
+#include <arducomm/types/vector3.h>
 
 class Odometry
 {

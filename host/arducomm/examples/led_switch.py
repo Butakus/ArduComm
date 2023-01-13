@@ -3,7 +3,7 @@
     - Command 0x00 turns the led OFF.
 """
 from arducomm import ArduComm
-from arducomm.arducomm import ACKFrame, START_FLAG
+from arducomm.arducomm import START_FLAG
 from time import time
 
 BAUDRATE = 57600
