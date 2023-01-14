@@ -3,7 +3,7 @@
     - Command 0x00 turns the led OFF.
 """
 from arducomm import ArduComm
-from arducomm.arducomm import START_FLAG
+from arducomm.arducomm import START_FLAG, ESCAPE_FLAG
 from time import time
 
 BAUDRATE = 57600
@@ -39,7 +39,7 @@ def main(args):
                 comm.send(0x03, [55, 50])
             elif command == 'e':
                 print('Sending flag (ON) command')
-                comm.send(START_FLAG, [125])
+                comm.send(START_FLAG, [ESCAPE_FLAG])
             elif command == 'q':
                 break
     except KeyboardInterrupt:

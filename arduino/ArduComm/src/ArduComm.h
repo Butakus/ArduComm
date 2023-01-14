@@ -73,6 +73,7 @@ private:
     Stream *serial_;
     uint8_t in_buffer_[64];
     uint8_t buffer_index_;
+    uint8_t escape_received_;
 
     uint8_t command_;
     uint8_t payload_[64];
@@ -80,7 +81,6 @@ private:
     uint8_t sent_seq_;
     ACKValue last_ack_;
     uint8_t retries_;
-    uint32_t start_time_;
 
     /* Get the frame sequence from the buffer, extract the frame data and process it */
     uint8_t process_frame();

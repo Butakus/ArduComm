@@ -17,7 +17,7 @@ ArduComm::ArduComm()
 {
     command_ = 0;
     buffer_index_ = 0;
-    start_time_ = 0;
+    escape_received_ = 0;
     payload_size_ = 0;
     sent_seq_ = 0;
     last_ack_ = ACK_UNSET;
@@ -51,6 +51,12 @@ uint8_t ArduComm::read()
             // Drop bytes until a START_FLAG arrives
             buffer_index_ = 0;
         }
+        else if (in_buffer_[buffer_index_ - 1] == ESCAPE_FLAG)
+        {
+            // Received a escape flag. Get ready to invert the next byte
+            escape_received_ = 1;
+            buffer_index_--;
+        }
         else if (in_buffer_[buffer_index_ - 1] == START_FLAG)
         {
             // Get number of bytes between start flags to skip ghost frames (between end_flag and start_flag)
@@ -71,6 +77,11 @@ uint8_t ArduComm::read()
                 in_buffer_[0] = START_FLAG;
                 buffer_index_ = 1;
             }
+        }
+        else if (escape_received_)
+        {
+            in_buffer_[buffer_index_ - 1] ^= (1 << 5);
+            escape_received_ = 0;
         }
     }
     return new_packet;
@@ -176,32 +187,11 @@ uint8_t ArduComm::get_payload(uint8_t payload[])
 uint8_t ArduComm::process_frame()
 {
     uint8_t new_packet = 0;
-    // Array to store the buffer data after removing escape flags
-    uint8_t escaped_data[buffer_index_];
-    uint8_t total_size = 0;
-    // Unescape the data
-    for (int i = 0; i < buffer_index_; ++i)
-    {
-        uint8_t b = in_buffer_[i];
-        if (b == ESCAPE_FLAG)
-        {
-            b = in_buffer_[++i] ^ (1 << 5);
-        }
-        escaped_data[total_size++] = b;
-    }
-    /* Even if we received 4 bytes, one of them could have been the escape.
-    *  In this case the frame is not valid (only 3 bytes: S/?/S).
-    */
-    // TODO: Decide what to do in this case. For now, silently drop the message.
-    if (total_size < 4)
-    {
-        return 0;
-    }
 
-    if (escaped_data[COMMAND] == ACK_COMMAND)
+    if (in_buffer_[COMMAND] == ACK_COMMAND)
     {
         // Received an ACK frame. Set the ack value.
-        if (escaped_data[SEQ_NUMBER] == sent_seq_)
+        if (in_buffer_[SEQ_NUMBER] == sent_seq_)
         {
             last_ack_ = ACK_RETRY;
         }
@@ -214,29 +204,29 @@ uint8_t ArduComm::process_frame()
     {
         // Received a packet frame. Update the command and payload fields
         // Copy frame data
-        command_ = escaped_data[COMMAND];
+        command_ = in_buffer_[COMMAND];
         // Maybe the frame size is smaller than 6 (frames without checksum like ACKs, should never happen)
-        payload_size_ = total_size > 6 ? total_size - 6 : 0;
+        payload_size_ = buffer_index_ > 6 ? buffer_index_ - 6 : 0;
         for (int i = 0; i < payload_size_; ++i)
         {
-            payload_[i] = escaped_data[PAYLOAD + i];
+            payload_[i] = in_buffer_[PAYLOAD + i];
         }
 
         // Check checksum
-        uint16_t received_checksum = (escaped_data[total_size - 3] << 8) | escaped_data[total_size - 2];
-        uint16_t computed_checksum = checksum(escaped_data[SEQ_NUMBER], command_, payload_size_, payload_);
+        uint16_t received_checksum = (in_buffer_[buffer_index_ - 3] << 8) | in_buffer_[buffer_index_ - 2];
+        uint16_t computed_checksum = checksum(in_buffer_[SEQ_NUMBER], command_, payload_size_, payload_);
 
         // Send ACK
         if (received_checksum != computed_checksum)
         {
             // Retry
-            send_ack(escaped_data[SEQ_NUMBER]);
+            send_ack(in_buffer_[SEQ_NUMBER]);
         }
         else
         {
             // Packet RX ok
             new_packet = 1;
-            send_ack((escaped_data[SEQ_NUMBER] + 1) % 256);
+            send_ack((in_buffer_[SEQ_NUMBER] + 1) % 256);
         }
     }
     return new_packet;
