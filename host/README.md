@@ -1,2 +1,2 @@
-# Host (ROS 2) library and examples
+# Host (Python) library and examples
 TODO: Documentation.
