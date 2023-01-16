@@ -17,7 +17,7 @@ uint8_t payload[64];
 
 void setup()
 {
-    // Initializa serial port and comms object
+    // Initialize serial port and comms object
     Serial.begin(57600);
     comms.begin(&Serial);
 

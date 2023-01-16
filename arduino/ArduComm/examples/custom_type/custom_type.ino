@@ -23,7 +23,7 @@ Odometry odom_msg;
 
 void setup()
 {
-    // Initializa serial port and comms object
+    // Initialize serial port and comms object
     Serial.begin(57600);
     comms.begin(&Serial);
 

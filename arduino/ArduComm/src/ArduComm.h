@@ -24,9 +24,9 @@
 
 typedef enum tx_error
 {
-    NO_ERROR = 0,
-    TIMEOUT_ERROR,
-    ACK_ERROR
+    NO_ERROR = 0,  // Frame was sent successfully
+    TIMEOUT_ERROR, // No ACK received after the timeout
+    ACK_ERROR      // Frame was received with errors multiple times (max. number of tx retries exceeded)
 } TXError;
 
 typedef enum ack_value
@@ -44,7 +44,7 @@ enum frame_index
     PAYLOAD = 3
 };
 
-class ArduComm{
+class ArduComm {
 
 public:
     ArduComm();
