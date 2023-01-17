@@ -15,8 +15,7 @@
 ArduComm comms;
 
 void setup(){
-    Serial.begin(57600);
-    comms.begin(&Serial);
+    comms.begin(57600);
 
     pinMode(13, OUTPUT);
     digitalWrite(13, HIGH);

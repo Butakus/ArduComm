@@ -15,8 +15,7 @@ uint8_t data_arr[data_size] = {5, 48, 100, 150};
 void setup()
 {
     // Initialize connection
-    Serial.begin(57600);
-    comms.begin(&Serial);
+    comms.begin(57600);
     delay(1000);
     // Send the single command 0x03 without any payload
     comms.send(0x03);

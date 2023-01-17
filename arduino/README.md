@@ -13,15 +13,17 @@ If you are using a Linux computer you can also run the script [install_arduino_l
 ```
 
 ## How to use
-The main library header `ArduComm.h` includes the `ArduComm` class that is used for the transmissions. Instances of this class must be initialized after opening the serial port (in the setup), and the reference to the Serial object must be passed to it:
+The main library header `ArduComm.h` includes the `ArduComm` class that is used for the transmissions. Instances of this class can be initialized in two ways: 1. Use the function `begin`, which will use the default `Serial` port at the specified baudrate. 2. Initialize the Stream that will be used for communications and use the function `set_stream(Stream* port)`:
 
 ```C++
 #include <ArduComm.h>
 ArduComm comms;
 void setup() {
     // Initialize serial port and comms object
-    Serial.begin(57600);
-    comms.begin(&Serial);
+    comms.begin(57600);
+    // Alternatively, open a Serial port (or any Stream) and pass it by reference
+    Serial2.begin(57600);
+    comms.set_stream(&Serial2);
     // Continue setup...
 }
 ```

@@ -27,7 +27,13 @@ ArduComm::ArduComm()
 ArduComm::~ArduComm(){}
 
 /* Initialize the serial object. serial.begin() must be called before this */
-void ArduComm::begin(Stream *port)
+void ArduComm::begin(unsigned long baud)
+{
+    Serial.begin(baud);
+    set_stream(&Serial);
+}
+/* Set the inner Stream object (Serial). Serial.begin() must be called before using the interface */
+void ArduComm::set_stream(Stream *port)
 {
     serial_ = port;
 }

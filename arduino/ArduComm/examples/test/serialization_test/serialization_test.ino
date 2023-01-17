@@ -10,7 +10,7 @@ uint8_t error;
 void setup()
 {
     Serial.begin(57600);
-    comms.begin(&Serial);
+    comms.begin(57600);
 
     pinMode(13, OUTPUT);
     blink(1000);

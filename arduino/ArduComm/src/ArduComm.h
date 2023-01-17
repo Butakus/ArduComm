@@ -50,8 +50,10 @@ public:
     ArduComm();
     ~ArduComm();
 
-    /* Initialize the serial object. serial.begin() must be called before this */
-    void begin(Stream* serial);
+    /* Initialize the default port (Serial). */
+    void begin(unsigned long baud);
+    /* Set the inner Stream object (Serial). The stream must be open (.begin(...)) before using the interface */
+    void set_stream(Stream* serial);
 
     /* Read the bytes from the serial buffer and check if a new frame is available.
     *  Return 1 if a new packet is available, else 0.

@@ -24,8 +24,7 @@ Odometry odom_msg;
 void setup()
 {
     // Initialize serial port and comms object
-    Serial.begin(57600);
-    comms.begin(&Serial);
+    comms.begin(57600);
 
     pinMode(13, OUTPUT);
     digitalWrite(13, HIGH);
