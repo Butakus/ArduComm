@@ -15,28 +15,28 @@
 
 #include <Arduino.h>
 
-#define TIMEOUT 3000
-#define MAX_RETRIES 3
+constexpr uint16_t TIMEOUT = 3000;
+constexpr uint8_t MAX_RETRIES = 3;
 
-#define START_FLAG 0x7E
-#define ESCAPE_FLAG 0x7D
-#define ACK_COMMAND 0x01
+constexpr uint8_t START_FLAG = 0x7E;
+constexpr uint8_t ESCAPE_FLAG = 0x7D;
+constexpr uint8_t ACK_COMMAND = 0x01;
 
-typedef enum tx_error
+typedef enum tx_error : uint8_t
 {
     NO_ERROR = 0,  // Frame was sent successfully
     TIMEOUT_ERROR, // No ACK received after the timeout
     ACK_ERROR      // Frame was received with errors multiple times (max. number of tx retries exceeded)
 } TXError;
 
-typedef enum ack_value
+typedef enum ack_value : uint8_t
 {
     ACK_UNSET = 0,
     ACK_OK,
     ACK_RETRY
 } ACKValue;
 
-enum frame_index
+enum frame_index : uint8_t
 {
     FLAG = 0,
     SEQ_NUMBER = 1,
@@ -66,8 +66,8 @@ public:
     TXError send(uint8_t command);
 
     /* Get the data from the last packet received */
-    uint8_t get_command();
-    uint8_t get_payload(uint8_t payload[]);
+    uint8_t get_command() const;
+    uint8_t get_payload(uint8_t payload[]) const;
     
 private:
     Stream *serial_;

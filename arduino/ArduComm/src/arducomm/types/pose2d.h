@@ -19,7 +19,7 @@ public:
     float y;
     float theta;
     // Payload size
-    const static uint8_t size = 3*sizeof(float);
+    static constexpr uint8_t size = 3*sizeof(float);
 
     Pose2D()
     {

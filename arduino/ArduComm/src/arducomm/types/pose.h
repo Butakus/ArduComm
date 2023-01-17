@@ -20,7 +20,7 @@ public:
     Vector3 position;
     Quaternion orientation;
     // Payload size
-    const static uint8_t size = Quaternion::size + Vector3::size;
+    static constexpr uint8_t size = Quaternion::size + Vector3::size;
 
     Pose() : position(), orientation()
     {

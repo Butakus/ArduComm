@@ -18,7 +18,7 @@ class FloatArray
 public:
     float data[DATA_SIZE];
     // Payload size
-    const static uint8_t size = DATA_SIZE * sizeof(float);
+    static constexpr uint8_t size = DATA_SIZE * sizeof(float);
 
     FloatArray() {}
 

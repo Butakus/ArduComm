@@ -24,7 +24,7 @@ public:
     Vector3 angular_vel;
     Vector3 linear_accel;
     // Payload size
-    const static uint8_t size = Quaternion::size + 2*Vector3::size;
+    static constexpr uint8_t size = Quaternion::size + 2*Vector3::size;
 
     Imu() : orientation(), angular_vel(), linear_accel()
     {

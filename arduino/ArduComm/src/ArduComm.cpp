@@ -169,12 +169,12 @@ TXError ArduComm::send(uint8_t command)
     return send(command, 0, NULL);
 }
 
-uint8_t ArduComm::get_command()
+uint8_t ArduComm::get_command() const
 {
     return command_;
 }
 
-uint8_t ArduComm::get_payload(uint8_t payload[])
+uint8_t ArduComm::get_payload(uint8_t payload[]) const
 {
 	for (int i = 0; i < payload_size_; ++i)
 	{
