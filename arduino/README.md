@@ -113,3 +113,21 @@ To this end, a serialization module is included in this library ([serialization.
 You can find the full list of supported types and how to serialize/parse them in [serialization_test](ArduComm/examples/test/serialization_test/serialization_test.ino) and [parser_test](ArduComm/examples/test/parser_test/parser_test.ino).
 
 Finally, you can also define your own types and use the provided serialization functions as it is done in the [custom_type](ArduComm/examples/custom_type) example.
+
+### Customize inner buffer size and number of callbacks
+The default buffer size in ArduComm class is 128 bytes, and the default number of callbacks is 256 (one for each possible command). These buffers are preallocated and take a lot of the memory in the MCU, so it might be necessary to change them to adapt them to our application.
+
+A template class `ArduCommT<size_t BUFFER_SIZE, size_t NUM_CALLBACKS>` is available to modify these values.
+
+The buffer size must be at least 6 bytes, to store a packet frame with just a command and no payload, and it can be increased if the expected payloads are bigger. It is recommended to leave it as small as possible, while allowing the biggest possible frame to fit.
+
+The number of callbacks is a little trickier. This number cannot be smaller than the highest possible command value. For example, if the possible commands to be received are {3, 9, 27}, the number of callbacks must be at least 28. It is recommended to use small command numbers so the number of callbacks can be reduced, thus saving more memory.
+
+This feature is presented in the [custom_buffer_size](ArduComm/examples/custom_buffer_size) example, and below are some different options to initialize the comms object:
+
+```C++
+ArduComm comms; // Default version, 128 bytes for buffers and 256 callbacks.
+ArduCommT<64, 16> comms_small; // Use 64 bytes for buffers and only 16 callbacks. The maximum command value is 15.
+ArduCommT<512, 8> comms_big; // Use a 512 bytes buffer to receive big messages, but keep the number of callbacks small.
+```
+
