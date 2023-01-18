@@ -79,10 +79,36 @@ void loop() {
 }
 ```
 
+Additionally, one can define callback functions to process a message from a given command.
+With this approach, all messages from this command must have the same type. The function `add_callback<T>(command, callback_function)` is used to associate a given command with a callback_function, automatically deserializing the payload into the given type `T`.
+
+Remember that the `read()` function must still be called in order to read the serial port and update the frame buffer. Otherwise incoming bytes will not be processed and callbacks will not be called.
+
+Below is an extract from [callback_example](ArduComm/examples/callback_example) that shows this functionality:
+
+```C++
+void cmd_callback(const float& data)
+{
+    // Process float data
+}
+
+ArduComm comms;
+void setup() {
+    comms.begin(57600);
+    comms.add_callback<float>(0x03, &cmd_callback);
+}
+
+void loop () {
+    comms.read();
+}
+```
+
+*Note: Please keep callbacks as light as possible and avoid using multiple communication functions from inside of them.
+
 ### Serialization
 In order to work with payloads containing other types than pure bytes (aka uint8_t, aka unsigned char), these types must be serialized (converted to bytes) before being transmitted. Similarly, the array of bytes that is received in the payload must be parsed (deserialized) to reconstruct these types.
 
-To this end, a serialization module is included in this library ([serialization.h](ArduComm/src/arducomm/serialization.h)), with support for basic types (char, String, uint8_t, int8_t, uint16_t, int16_t, uint32_t, int32_t and float). Additional "complex" types are also defined in the types directory to provide more options with types such as 2D and 3D vectors, quaternions, or 2D/3D poses.
+To this end, a serialization module is included in this library ([serialization.h](ArduComm/src/arducomm/serialization.h)), with support for basic types (char, String, uint8_t, int8_t, uint16_t, int16_t, uint32_t, int32_t, and float). Additional "complex" types are also defined in the types directory to provide more options with types such as 2D and 3D vectors, quaternions, or 2D/3D poses.
 
 You can find the full list of supported types and how to serialize/parse them in [serialization_test](ArduComm/examples/test/serialization_test/serialization_test.ino) and [parser_test](ArduComm/examples/test/parser_test/parser_test.ino).
 

@@ -46,7 +46,6 @@ void ArduComm::set_stream(Stream *port)
 uint8_t ArduComm::read()
 {
     // Read all bytes in the serial buffer
-    uint8_t new_packet = 0;
     while (serial_->available())
     {
         // Read first byte into the buffer
@@ -68,13 +67,8 @@ uint8_t ArduComm::read()
             // Get number of bytes between start flags to skip ghost frames (between end_flag and start_flag)
             if (buffer_index_ > 3)
             {
-                // There is a complete frame in the buffer. Process it.
-                new_packet = process_frame();
-                // After processing the frame, clear the index to reuse the buffer
-                in_buffer_[0] = 0;
-                buffer_index_ = 0;
-                // Exit if a new packet is received to avoid overwriting packets
-                if (new_packet) break;
+                // There is a complete frame in the buffer. Process it and return if new_packet is available
+                return process_frame();
             }
             else
             {
@@ -90,7 +84,8 @@ uint8_t ArduComm::read()
             escape_received_ = 0;
         }
     }
-    return new_packet;
+    // If no more bytes available to read, return 0 (no full frame available yet)
+    return 0;
 }
 
 /* Write a byte to the serial interface, escaping if necessary */
@@ -205,6 +200,7 @@ uint8_t ArduComm::process_frame()
         {
             last_ack_ = ACK_OK;
         }
+        new_packet = 1;
     }
     else
     {
@@ -235,6 +231,19 @@ uint8_t ArduComm::process_frame()
             send_ack((in_buffer_[SEQ_NUMBER] + 1) % 256);
         }
     }
+
+    // After processing the frame, clear the index to reuse the buffer
+    in_buffer_[0] = 0;
+    buffer_index_ = 0;
+
+    // If the packet frame is ok and we have a subscriber registered for this command, execute the callback function.
+    // Use the command in the buffer instead of command_,
+    // because we might be processing an ACK and command_ will have the value of the latest command
+    if (new_packet && subscribers_[in_buffer_[COMMAND]])
+    {
+        subscribers_[command_]->callback(payload_);
+    }
+
     return new_packet;
 }
 

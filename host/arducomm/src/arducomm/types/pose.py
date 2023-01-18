@@ -12,7 +12,7 @@ class Pose(Serializable):
         self.orientation = orientation
     
     def __repr__(self):
-        return F"{self.position.__repr__()} | {self.orientation.__repr__()}]"
+        return F"{self.position.__repr__()} | {self.orientation.__repr__()}"
 
     def serialize(self):
         """ Serialize the data contained in self.

@@ -14,6 +14,7 @@
 #define ARDUCOMM_H
 
 #include <Arduino.h>
+#include "arducomm/subscriber.h"
 
 constexpr uint16_t TIMEOUT = 3000;
 constexpr uint8_t MAX_RETRIES = 3;
@@ -70,7 +71,17 @@ public:
     /* Get the data from the last packet received */
     uint8_t get_command() const;
     uint8_t get_payload(uint8_t payload[]) const;
-    
+
+    /* Add a new callback to process received messages.
+       All packet frames with the specified command will be parsed and processed by the given callback function.
+       The template param T defines the type of the messages for this callback, necessary for the parsing.
+     */
+    template <typename T>
+    void add_callback(const uint8_t& command, typename arducomm::Subscriber<T>::f_callback_t callback)
+    {
+        subscribers_[command] = new arducomm::Subscriber<T>(callback);
+    }
+
 private:
     Stream *serial_;
     uint8_t in_buffer_[64];
@@ -83,6 +94,8 @@ private:
     uint8_t sent_seq_;
     ACKValue last_ack_;
     uint8_t retries_;
+
+    arducomm::Subscriber_* subscribers_[256];
 
     /* Get the frame sequence from the buffer, extract the frame data and process it */
     uint8_t process_frame();
