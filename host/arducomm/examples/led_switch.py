@@ -5,6 +5,8 @@
 from arducomm import ArduComm
 from arducomm.arducomm import START_FLAG, ESCAPE_FLAG
 from time import time
+import logging
+logging.basicConfig(level=logging.INFO)
 
 BAUDRATE = 57600
 

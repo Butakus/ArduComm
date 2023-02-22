@@ -10,7 +10,7 @@ readme = "README.md"
 
 requires-python = ">=3.7"
 
-license = {"text" = "GLPv3"}
+license = {text = "GLPv3"}
 
 keywords = ["communication", "arduino", "serial"]
 

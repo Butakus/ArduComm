@@ -5,6 +5,8 @@ from arducomm import ArduComm
 from arducomm.serialization import serialize
 from arducomm.types import Pose
 from time import time
+import logging
+logging.basicConfig(level=logging.INFO)
 
 BAUDRATE = 57600
 

@@ -10,6 +10,8 @@ from arducomm import ArduComm
 from arducomm.serialization import Serializable, parse, serialize
 from arducomm.types import Pose, Vector3
 from time import time, sleep
+import logging
+logging.basicConfig(level=logging.INFO)
 
 BAUDRATE = 57600
 

@@ -6,8 +6,12 @@
 
 import serial
 import sys
+import logging
 from time import sleep, time
 from threading import Thread, Lock
+
+# Logging setup
+logging.getLogger('ArduComm').addHandler(logging.NullHandler())
 
 # Default baudrate
 BAUDRATE = 57600
@@ -166,7 +170,7 @@ class ArduComm(Thread):
         self.serial_lock = Lock()
         self.callback = message_callback
 
-        print("Connecting to serial port...")
+        logging.info("Connecting to serial port...")
         try:
             self.ser = serial.Serial(port=port, baudrate=baudrate)
             # Wait for the arduino to init
@@ -174,16 +178,16 @@ class ArduComm(Thread):
             while not self.ser.isOpen():
                 sleep(0.1)
                 if time() - open_time > TIMEOUT:
-                    print("\nConnection timeout.")
+                    logging.error("Connection timeout.")
                     raise TimeoutError("Connection timeout")
         except serial.serialutil.SerialException:
-            print("\nSerial device not connected. Program aborted.\n")
+            logging.warn("Serial device not connected. Program aborted.")
             sys.exit(1)
         except ValueError as ve:
-            print("\nSerial parameters not valid.\n")
+            logging.error("Serial parameters not valid.")
             raise ve
         else:
-            print("Connected!\n")
+            logging.info("Connected!")
 
         Thread.__init__(self)
         self.daemon = True
@@ -200,14 +204,14 @@ class ArduComm(Thread):
             if self.ser.inWaiting() > 0:
                 try:
                     b = self.ser.read(1)
-                except SerialException as se:
+                except serial.serialutil.SerialException as se:
                     # TODO
-                    print("Error: Could not read the serial port!")
+                    logging.warn(F"Could not read the serial port! Exception: {str(se)}")
                     continue
                 in_buffer += b
                 if in_buffer[0] != START_FLAG:
                     # Broken frame. The buffer will never contain a full packet.
-                    print(F"Broken frame. Current buffer: {[i for i in in_buffer]}")
+                    logging.warn(F"Broken frame. Current buffer: {[i for i in in_buffer]}")
                     # Drop bytes until a START_FLAG arrives
                     in_buffer.clear()
                 elif b[0] == START_FLAG:
@@ -221,7 +225,7 @@ class ArduComm(Thread):
                     else:
                         # We received a start flag but the buffer is too small to contain a full frame
                         if len(in_buffer) > 1:
-                            print(F"Packet frame too small. Current buffer: {[i for i in in_buffer]}")
+                            logging.warn(F"Packet frame too small. Current buffer: {[i for i in in_buffer]}")
                         in_buffer = bytearray(b)
             else:
                 sleep(PACKET_POLL_TIME)
@@ -232,7 +236,7 @@ class ArduComm(Thread):
             if self.ser.inWaiting() > 0:
                 b = self.ser.read(1)
                 in_buffer += b
-                print("Buffer: {}".format(in_buffer))
+                logging.debug("Buffer: {}".format(in_buffer))
             sleep(PACKET_POLL_TIME)
         """
 
@@ -263,7 +267,7 @@ class ArduComm(Thread):
 
             # Send ACK
             if retry:
-                print("Packet checksum mismatch")
+                logging.info("Packet checksum mismatch. Sending ACK for retransmission.")
                 # Reset the ack packet number to indicate retransmission
                 self.send_frame(ACKFrame(seq_number))
             else:
@@ -280,11 +284,11 @@ class ArduComm(Thread):
         self.running = False
 
         if self.ser.isOpen():
-            print("\nClosing serial port...")
+            logging.info("Closing serial port...")
             self.ser.close()
-            print("Serial port closed.")
+            logging.info("Serial port closed.")
         else:
-            print("Serial port is already closed.")
+            logging.info("Serial port is already closed.")
 
 
     def send_frame(self, frame):
@@ -316,8 +320,8 @@ class ArduComm(Thread):
         while not self.last_ack:
             # Check for the timeout, so it does not stay here forever
             if (time() - sent_time) >= TIMEOUT:
-                print("Timeout exceeded.")
-                print("Did not received the ACK for packet {n} with command {c}".format(n=frame.seq_number, c=frame.command))
+                logging.warn("Timeout exceeded.")
+                logging.warn("Did not received the ACK for packet {n} with command {c}".format(n=frame.seq_number, c=frame.command))
                 return False
             sleep(ACK_POLL_TIME)
         # Check the ACK and retry if needed
@@ -325,10 +329,10 @@ class ArduComm(Thread):
             # Retry
             self.retries += 1
             if self.retries >= MAX_RETRIES:
-                print('Could not send packet {n} with command {c}'.format(c=frame.command, n=frame.seq_number))
+                logging.warn('Could not send packet {n} with command {c}'.format(c=frame.command, n=frame.seq_number))
                 return False
             else:
-                print("Received ACK with retry code. Retrying packet {n}...".format(n=frame.seq_number))
+                logging.warn("Received ACK with retry code. Retrying packet {n}...".format(n=frame.seq_number))
                 return self.send_frame(frame)
         else:
             # ACK OK
@@ -339,16 +343,16 @@ class ArduComm(Thread):
     def send(self, command, payload=[]):
         """ Send a packet given the command and the payload """
         if command > 255:
-            print("Error: Command number > 255. Frame cannot be sent")
+            logging.error("Command number > 255. Frame cannot be sent")
             return False
         if len(payload) > 255:
-            print("Error: Payload length exceded. Frame cannot be sent")
+            logging.error("Payload length exceded. Frame cannot be sent")
             return False
 
         self.sent_seq = (self.sent_seq + 1) % 256
 
         # Create the Packet frame
         frame = PacketFrame(self.sent_seq, command, payload)
-        print(F"Sending packet {self.sent_seq} with command {command}")
+        logging.debug(F"Sending packet {self.sent_seq} with command {command}")
 
         return self.send_frame(frame)

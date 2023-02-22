@@ -1,6 +1,8 @@
 from arducomm import ArduComm
 from arducomm.arducomm import ACKFrame, START_FLAG
 from time import time
+import logging
+logging.basicConfig(level=logging.INFO)
 
 BAUDRATE = 57600
 

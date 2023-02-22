@@ -8,6 +8,8 @@
 from arducomm import ArduComm, serialization
 from arducomm.types import *
 from time import sleep
+import logging
+logging.basicConfig(level=logging.INFO)
 
 BAUDRATE = 57600
 

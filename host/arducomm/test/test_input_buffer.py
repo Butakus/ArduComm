@@ -2,6 +2,8 @@
 import serial
 from time import time, sleep
 from arducomm import ArduComm, PacketFrame
+import logging
+logging.basicConfig(level=logging.INFO)
 
 BAUDRATE = 9600
 
